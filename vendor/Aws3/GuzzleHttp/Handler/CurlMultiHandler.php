@@ -12,8 +12,6 @@ use DeliciousBrains\WP_Offload_S3\Aws3\Psr\Http\Message\RequestInterface;
  * When using the CurlMultiHandler, custom curl options can be specified as an
  * associative array of curl option constants mapping to values in the
  * **curl** key of the provided request options.
- *
- * @property resource $_mh Internal use only. Lazy loaded multi-handle.
  */
 class CurlMultiHandler
 {
@@ -23,6 +21,7 @@ class CurlMultiHandler
     private $active;
     private $handles = [];
     private $delays = [];
+	private $_mh;
     /**
      * This handler accepts the following options:
      *
@@ -36,6 +35,9 @@ class CurlMultiHandler
     {
         $this->factory = isset($options['handle_factory']) ? $options['handle_factory'] : new \DeliciousBrains\WP_Offload_S3\Aws3\GuzzleHttp\Handler\CurlFactory(50);
         $this->selectTimeout = isset($options['select_timeout']) ? $options['select_timeout'] : 1;
+	    // unsetting the property forces the first access to go through
+	    // __get().
+	    unset($this->_mh);
     }
     public function __get($name)
     {
