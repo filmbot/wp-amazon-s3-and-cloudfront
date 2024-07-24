@@ -2,17 +2,17 @@
 
 namespace DeliciousBrains\WP_Offload_S3\Aws3\Aws\Api\Parser;
 
+use DeliciousBrains\WP_Offload_S3\Aws3\Aws\Api\StructureShape;
 use DeliciousBrains\WP_Offload_S3\Aws3\Aws\CommandInterface;
 use DeliciousBrains\WP_Offload_S3\Aws3\Aws\Exception\AwsException;
 use DeliciousBrains\WP_Offload_S3\Aws3\Psr\Http\Message\ResponseInterface;
+use DeliciousBrains\WP_Offload_S3\Aws3\Psr\Http\Message\StreamInterface;
 use DeliciousBrains\WP_Offload_S3\Aws3\GuzzleHttp\Psr7;
 /**
  * @internal Decorates a parser and validates the x-amz-crc32 header.
  */
-class Crc32ValidatingParser extends \DeliciousBrains\WP_Offload_S3\Aws3\Aws\Api\Parser\AbstractParser
+class Crc32ValidatingParser extends AbstractParser
 {
-    /** @var callable */
-    private $parser;
     /**
      * @param callable $parser Parser to wrap.
      */
@@ -20,15 +20,19 @@ class Crc32ValidatingParser extends \DeliciousBrains\WP_Offload_S3\Aws3\Aws\Api\
     {
         $this->parser = $parser;
     }
-    public function __invoke(\DeliciousBrains\WP_Offload_S3\Aws3\Aws\CommandInterface $command, \DeliciousBrains\WP_Offload_S3\Aws3\Psr\Http\Message\ResponseInterface $response)
+    public function __invoke(CommandInterface $command, ResponseInterface $response)
     {
         if ($expected = $response->getHeaderLine('x-amz-crc32')) {
-            $hash = hexdec(\DeliciousBrains\WP_Offload_S3\Aws3\GuzzleHttp\Psr7\hash($response->getBody(), 'crc32b'));
+            $hash = \hexdec(Psr7\Utils::hash($response->getBody(), 'crc32b'));
             if ($expected != $hash) {
-                throw new \DeliciousBrains\WP_Offload_S3\Aws3\Aws\Exception\AwsException("crc32 mismatch. Expected {$expected}, found {$hash}.", $command, ['code' => 'ClientChecksumMismatch', 'connection_error' => true, 'response' => $response]);
+                throw new AwsException("crc32 mismatch. Expected {$expected}, found {$hash}.", $command, ['code' => 'ClientChecksumMismatch', 'connection_error' => \true, 'response' => $response]);
             }
         }
         $fn = $this->parser;
         return $fn($command, $response);
+    }
+    public function parseMemberFromStream(StreamInterface $stream, StructureShape $member, $response)
+    {
+        return $this->parser->parseMemberFromStream($stream, $member, $response);
     }
 }

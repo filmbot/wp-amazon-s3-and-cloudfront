@@ -2,12 +2,15 @@
 
 namespace DeliciousBrains\WP_Offload_S3\Aws3\Aws\S3\Exception;
 
+use DeliciousBrains\WP_Offload_S3\Aws3\Aws\HasMonitoringEventsTrait;
+use DeliciousBrains\WP_Offload_S3\Aws3\Aws\MonitoringEventsInterface;
 /**
  * Exception thrown when errors occur while deleting objects using a
  * {@see S3\BatchDelete} object.
  */
-class DeleteMultipleObjectsException extends \Exception
+class DeleteMultipleObjectsException extends \Exception implements MonitoringEventsInterface
 {
+    use HasMonitoringEventsTrait;
     private $deleted = [];
     private $errors = [];
     /**
@@ -16,8 +19,8 @@ class DeleteMultipleObjectsException extends \Exception
      */
     public function __construct(array $deleted, array $errors)
     {
-        $this->deleted = array_values($deleted);
-        $this->errors = array_values($errors);
+        $this->deleted = \array_values($deleted);
+        $this->errors = \array_values($errors);
         parent::__construct('Unable to delete certain keys when executing a' . ' DeleteMultipleObjects request: ' . self::createMessageFromErrors($errors));
     }
     /**
@@ -29,8 +32,8 @@ class DeleteMultipleObjectsException extends \Exception
      */
     public static function createMessageFromErrors(array $errors)
     {
-        return "\n- " . implode("\n- ", array_map(function ($key) {
-            return json_encode($key);
+        return "\n- " . \implode("\n- ", \array_map(function ($key) {
+            return \json_encode($key);
         }, $errors));
     }
     /**
