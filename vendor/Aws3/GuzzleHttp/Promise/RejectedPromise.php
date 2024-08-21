@@ -13,7 +13,7 @@ class RejectedPromise implements \DeliciousBrains\WP_Offload_S3\Aws3\GuzzleHttp\
     private $reason;
     public function __construct($reason)
     {
-        if (method_exists($reason, 'then')) {
+	    if (\is_object($reason) && \method_exists($reason, 'then')) {
             throw new \InvalidArgumentException('You cannot create a RejectedPromise with a promise.');
         }
         $this->reason = $reason;
