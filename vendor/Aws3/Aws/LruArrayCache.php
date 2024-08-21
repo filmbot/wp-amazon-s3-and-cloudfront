@@ -62,6 +62,10 @@ class LruArrayCache implements \DeliciousBrains\WP_Offload_S3\Aws3\Aws\CacheInte
     {
         unset($this->items[$key]);
     }
+	/**
+	 * @return int
+	 */
+	#[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->items);

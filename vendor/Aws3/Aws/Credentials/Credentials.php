@@ -56,16 +56,24 @@ class Credentials implements \DeliciousBrains\WP_Offload_S3\Aws3\Aws\Credentials
     {
         return ['key' => $this->key, 'secret' => $this->secret, 'token' => $this->token, 'expires' => $this->expires];
     }
-    public function serialize()
-    {
-        return json_encode($this->toArray());
-    }
-    public function unserialize($serialized)
-    {
-        $data = json_decode($serialized, true);
-        $this->key = $data['key'];
-        $this->secret = $data['secret'];
-        $this->token = $data['token'];
-        $this->expires = $data['expires'];
-    }
+	public function serialize()
+	{
+		return \json_encode($this->__serialize());
+	}
+	public function unserialize($serialized)
+	{
+		$data = \json_decode($serialized, \true);
+		$this->__unserialize($data);
+	}
+	public function __serialize()
+	{
+		return $this->toArray();
+	}
+	public function __unserialize($data)
+	{
+		$this->key = $data['key'];
+		$this->secret = $data['secret'];
+		$this->token = $data['token'];
+		$this->expires = $data['expires'];
+	}
 }
